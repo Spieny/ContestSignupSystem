@@ -3,7 +3,7 @@ package com.ziahh.contest.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import me.ziahh.schedule.common.Result;
+import com.ziahh.contest.common.Result;
 
 import java.io.BufferedReader;
 import java.io.IOException;
