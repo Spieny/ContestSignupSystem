@@ -11,7 +11,7 @@ public class SysUserDaoImpl extends BaseDao implements SysUserDao {
     public int register(SysUser sysUser) {
         String sql = "insert into sys_user values(DEFAULT,?,?)";
         int rows = baseUpdate(sql,sysUser.getUserName(),sysUser.getUserPwd());
-        return 0;
+        return rows;
     }
 
     @Override

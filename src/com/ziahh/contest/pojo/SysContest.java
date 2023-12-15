@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Date;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -16,7 +18,7 @@ public class SysContest {
     private String contestType;
     private Integer contestTotal;
     private Integer contestEnroll;
-    private String contestBeginTime;
-    private String contestEndTime;
+    private Date contestBeginTime;
+    private Date contestEndTime;
     private Integer contestStatus;
 }
