@@ -36,4 +36,24 @@ public interface SysContestDao {
      * @return
      */
     int unenroll(SysEnroll enroll);
+
+    /**
+     * 添加比赛
+     * @return
+     */
+    int addContest(SysContest contest);
+
+    /**
+     * 根据cid寻找比赛
+     * @param cid 比赛id
+     * @return
+     */
+    SysContest findContestByCid(String cid);
+
+    /**
+     * 更新比赛信息
+     * @param contest
+     * @return
+     */
+    int updateContest(SysContest contest);
 }

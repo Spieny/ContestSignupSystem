@@ -49,5 +49,46 @@ public class SysContestDaoImpl extends BaseDao implements SysContestDao {
         return rows1 + rows2;
     }
 
+    @Override
+    public int addContest(SysContest contest) {
+        String sql = """
+                insert into sys_contest values (default,?,?,?,?,?,?,?,?,?)
+                """;
+        int rows = baseUpdate(sql,contest.getContestName(),
+                    contest.getContestDesc(),contest.getContestHost(),contest.getContestType(),
+                    contest.getContestTotal(),contest.getContestEnroll(),contest.getContestBeginTime(),
+                contest.getContestEndTime(),contest.getContestStatus());
+        return rows;
+    }
+
+    @Override
+    public SysContest findContestByCid(String cid) {
+        String sql = "select * from sys_contest where cid = ?";
+        List<SysContest> list = baseQuery(SysContest.class,sql,cid);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    @Override
+    public int updateContest(SysContest contest) {
+        String sql = """
+                update sys_contest set
+                contestName = ?,
+                contestDesc = ?,
+                contestHost = ?,
+                contestType = ?,
+                contestTotal = ?,
+                contestEnroll = ?,
+                contestBeginTime = ?,
+                contestEndTime = ?,
+                contestStatus = ?
+                 where cid = ?
+                """;
+        int rows = baseUpdate(sql,contest.getContestName(),
+                contest.getContestDesc(),contest.getContestHost(),contest.getContestType(),
+                contest.getContestTotal(),contest.getContestEnroll(),contest.getContestBeginTime(),
+                contest.getContestEndTime(),contest.getContestStatus(),contest.getCid());
+        return rows;
+    }
+
 
 }

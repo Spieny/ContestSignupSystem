@@ -15,7 +15,8 @@ public class WebUtil {
     static{
         objectMapper=new ObjectMapper();
         // 设置JSON和Object转换时的时间日期格式
-        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        //objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd"));
     }
     // 从请求中获取JSON串并转换为Object
     public static <T> T readJson(HttpServletRequest request, Class<T> clazz){

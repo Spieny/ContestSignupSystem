@@ -33,4 +33,30 @@ public interface SysContestService {
      * @return 如果为空，说明用户没有报名
      */
     List<SysEnroll> findSpecificUserEnroll(SysEnroll enroll);
+
+    /**
+     * 检查比赛是否已经满人
+     * @return 返回true则已经报满
+     */
+    boolean checkContestFull(SysEnroll enroll);
+
+    /**
+     * 添加比赛
+     * @return 返回大于0的整数代表成功
+     */
+    int addContest(SysContest contest);
+
+    /**
+     * 通过cid获取一个比赛对象
+     * @param cid
+     * @return
+     */
+    SysContest findContestByCid(String cid);
+
+    /**
+     * 更新比赛信息
+     * @param contest
+     * @return
+     */
+    int updateContest(SysContest contest);
 }

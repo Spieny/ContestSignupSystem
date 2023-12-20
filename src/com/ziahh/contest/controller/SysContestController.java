@@ -1,5 +1,6 @@
 package com.ziahh.contest.controller;
 
+import com.ziahh.contest.common.ContestStatus;
 import com.ziahh.contest.common.Result;
 import com.ziahh.contest.common.ResultCodeEnum;
 import com.ziahh.contest.pojo.SysContest;
@@ -74,6 +75,14 @@ public class SysContestController extends BaseController{
             return;
         }
 
+        //比赛人数已满
+        System.out.println("[debug]" + sysContest.getContestEnroll() + " >= " +  sysContest.getContestTotal());
+        if(sysContest.getContestEnroll() >= sysContest.getContestTotal()){
+            result = Result.build(null,ResultCodeEnum.CONTEST_FULL);
+            WebUtil.writeJson(resp,result);
+            return;
+        }
+
         int rows = contestService.enroll(enroll);
         if (rows == 2){
             result = Result.ok(null);
@@ -101,7 +110,6 @@ public class SysContestController extends BaseController{
     protected void test(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         super.service(req, resp);
     }
-
     protected void unenroll(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Result result = null;
         SysEnroll enroll = WebUtil.readJson(req,SysEnroll.class);
@@ -148,5 +156,63 @@ public class SysContestController extends BaseController{
         }
         WebUtil.writeJson(resp,result);
         System.out.println("[ACTION] 用户" + enroll.getUid() + " 取消报名比赛 " + enroll.getCid());
+    }
+
+    protected void addContest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+        SysContest contest = WebUtil.readJson(req,SysContest.class);
+        //检验时间是否合法
+        if (contest.getContestBeginTime().after(contest.getContestEndTime())){
+            WebUtil.writeJson(resp,Result.build(null,ResultCodeEnum.CONTEST_TIME_ILLEGAL));
+            return;
+        }
+        //根据比赛报名时间设置STATUS
+        if (contest.getContestBeginTime().after(new Date( System.currentTimeMillis()))){
+            contest.setContestStatus(ContestStatus.NOT_START.getCode());
+        } else if (contest.getContestEndTime().after(new Date(System.currentTimeMillis()))){
+            contest.setContestStatus(ContestStatus.STARTED.getCode());
+        } else {
+            contest.setContestStatus(ContestStatus.END.getCode());
+        }
+
+        int rows = contestService.addContest(contest);
+        if(rows > 0){
+            WebUtil.writeJson(resp,Result.ok(null));
+        }
+    }
+
+    protected void findContest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+        String cid = req.getParameter("cid");
+        SysContest contest = contestService.findContestByCid(cid);
+        if(contest != null){
+            WebUtil.writeJson(resp,Result.ok(contest));
+        } else {
+            WebUtil.writeJson(resp,Result.build(null,ResultCodeEnum.CONTEST_NOTFOUND));
+        }
+    }
+
+    protected void updateContest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+        SysContest contest = WebUtil.readJson(req,SysContest.class);
+        System.out.println("GET：" + contest);
+        //检验时间是否合法
+        if (contest.getContestBeginTime().after(contest.getContestEndTime())){
+            WebUtil.writeJson(resp,Result.build(null,ResultCodeEnum.CONTEST_TIME_ILLEGAL));
+            return;
+        }
+        //根据比赛报名时间设置STATUS
+        if (contest.getContestBeginTime().after(new Date( System.currentTimeMillis()))){
+            contest.setContestStatus(ContestStatus.NOT_START.getCode());
+        } else if (contest.getContestEndTime().after(new Date(System.currentTimeMillis()))){
+            contest.setContestStatus(ContestStatus.STARTED.getCode());
+        } else {
+            contest.setContestStatus(ContestStatus.END.getCode());
+        }
+
+        int rows = contestService.updateContest(contest);
+        System.out.println("r:" + rows);
+        if(rows > 0){
+            WebUtil.writeJson(resp,Result.ok(null));
+        } else {
+            WebUtil.writeJson(resp,Result.build(null,ResultCodeEnum.NOT_CHANGED));
+        }
     }
 }

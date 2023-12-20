@@ -2,6 +2,8 @@ package com.ziahh.contest.controller;
 
 import com.ziahh.contest.common.Result;
 import com.ziahh.contest.common.ResultCodeEnum;
+import com.ziahh.contest.pojo.SysContest;
+import com.ziahh.contest.pojo.SysUpdate;
 import com.ziahh.contest.pojo.SysUser;
 import com.ziahh.contest.service.Impl.SysUserServiceImpl;
 import com.ziahh.contest.service.SysUserService;
@@ -13,6 +15,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @WebServlet("/api/user/*")
 public class SysUserController extends BaseController{
@@ -40,7 +46,7 @@ public class SysUserController extends BaseController{
             result = Result.build(null,ResultCodeEnum.USERNAME_ERROR);
         }
         // 将result对象转换为JSON串响应给客户端
-        WebUtil.writeJson(resp,result);
+        WebUtil.writeJson(resp,result );
     }
 
     /**
@@ -63,7 +69,7 @@ public class SysUserController extends BaseController{
     }
 
     /**
-     * 接受前端注册的要求
+     * 接受前端注册的请求
      */
     protected void register(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         SysUser newUser = WebUtil.readJson(req,SysUser.class);
@@ -76,4 +82,59 @@ public class SysUserController extends BaseController{
         }
         WebUtil.writeJson(resp,result);
     }
+
+    /**
+     * 接受前端更新个人信息的请求
+     */
+    protected void update(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        SysUpdate update = WebUtil.readJson(req,SysUpdate.class);
+        SysUser user = userService.findByUsername(update.getUserName());
+        Result result = null;
+        //数据库生效行数
+        int rows = 0;
+        //用户不存在
+        if(user == null){
+            result = Result.build(null,ResultCodeEnum.NOTLOGIN);
+            WebUtil.writeJson(resp,result);
+            return;
+        }
+        //如果class发生改变,更新class
+        System.out.println("class:" + update.getUserClass() + "|" + user.getUserClass());
+        if(!update.getUserClass().equals(user.getUserClass())){
+            rows += userService.updateClass(update);
+        } else {
+            result = Result.build(null,ResultCodeEnum.NOT_CHANGED);
+        }
+        //如果新密码和旧密码都不是空的，更新密码
+        if(!(update.getUpdatePwd().isEmpty() && update.getUserPwd().isEmpty())){
+            //校验原密码
+            if(user.getUserPwd().equals(MD5Util.encrypt(update.getUserPwd()))){
+                rows += userService.updatePassword(update);
+            } else {
+                result = Result.build(null,ResultCodeEnum.PASSWORD_ERROR);
+                WebUtil.writeJson(resp,result);
+                return;
+            }
+        }
+
+        if(rows != 0){
+            result = Result.ok(null);
+        }
+
+
+        WebUtil.writeJson(resp,result);
+    }
+
+    /**
+     * 获取用户已报名的比赛
+     */
+    protected void getEnrolledContest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+        SysUser user = WebUtil.readJson(req,SysUser.class);
+        List<SysContest> allContest = userService.findEnrolledContest(user);
+        //将比赛信息存入result,转换json发送给客户端
+        Map<String,Object> data = new HashMap<>();
+        data.put("itemList",allContest);
+        WebUtil.writeJson(resp, Result.ok(data));
+    }
+
 }
